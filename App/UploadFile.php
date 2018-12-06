@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: delux
- * Date: 29.11.2018
- * Time: 16:29
- */
 
 namespace App;
 

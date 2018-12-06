@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: delux
- * Date: 05.12.2018
- * Time: 10:40
- */
 
 namespace App;
-
 
 class Section
 {
