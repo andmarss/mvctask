@@ -47,7 +47,7 @@ class Controller
         if(!$this->validator->passed()) {
             Session::put('error', $this->validator->getErrors());
 
-            redirect()->back();
+            redirect()->back(['errors' => $this->validator->getErrors()]);
         }
     }
 }

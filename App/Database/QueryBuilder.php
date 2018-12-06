@@ -8,10 +8,8 @@
 
 namespace App\Database;
 
-use App\App;
 
-// $arr = [[1,2,3],[4,5,6],[7,8,9]];
-// array_merge(...$arr) => [1,2,3,4,5,6,7,8,9]
+use App\App;
 
 class QueryBuilder
 {
@@ -99,8 +97,9 @@ class QueryBuilder
 
         if(!isset($this->sql['from']) && isset($this->sql['table'])) {
             $this->from($this->sql['table']);
-            $this->reset(['table']);
         }
+
+        $this->reset(['table']);
 
         $operators = ['=', '>', '<', '<=', '>=', '<>'];
 
@@ -111,8 +110,7 @@ class QueryBuilder
             $value = func_get_arg(2);
 
             if(in_array($operator, $operators)) {
-                $this->sql['where'][] = "{$field} {$operator} :{$field}";
-                $this->bindings['where'][] = [$field => $value];
+                $this->sql['where'][] = "{$field} {$operator} {$this->escape($value)}";
             }
 
         } elseif (is_array($conditions) && count($conditions) === 3) { // where([field,operator,value])
@@ -122,18 +120,16 @@ class QueryBuilder
             $value = $conditions[2];
 
             if(in_array($operator, $operators)) {
-                $this->sql['where'][] = "{$field} {$operator} :{$field}";
-                $this->bindings['where'][] = [$field => $value];
+                $this->sql['where'][] = "{$field} {$operator} {$this->escape($value)}";
             }
 
         } elseif (is_array($conditions) && count($conditions) !== 3 && count($conditions) > 0) {
 
-            $where = implode(' AND ', array_map(function ($key){
-                return "$key = :{$key}";
-            }, array_keys($conditions)));
+            $where = implode(' AND ', array_map(function ($key, $value){
+                return "$key = {$this->escape($value)}";
+            }, array_keys($conditions), array_values($conditions)));
 
             $this->sql['where'][] = $where;
-            $this->bindings['where'][] = $conditions;
 
         }
 
@@ -169,7 +165,6 @@ class QueryBuilder
 
         if(!isset($this->sql['from']) && isset($this->sql['table'])) {
             $this->from($this->sql['table']);
-            $this->reset(['table']);
         }
 
         if(is_callable($value)) {
@@ -182,7 +177,7 @@ class QueryBuilder
 
         } elseif (is_array($value)) {
 
-            $values = $this->escape( implode(', ', array_values($value)) );
+            $values = implode(', ', array_values($value));
             $this->sql['where'][] = "{$field} IN ({$values})";
 
         }
@@ -211,18 +206,15 @@ class QueryBuilder
 
         if(!isset($this->sql['from']) && isset($this->sql['table'])) {
             $this->from($this->sql['table']);
-            $this->reset(['table']);
         }
 
         if (count($this->sql['where']) > 0) {
 
-            $condition = implode(' AND ', array_map(function ($key){
-                return "$key = :{$key}";
-            }, array_keys($condition)));
+            $condition = implode(' AND ', array_map(function ($key, $value){
+                return "$key = {$this->escape($value)}";
+            }, array_keys($condition), array_values($condition)));
 
             $this->sql['where'][] = ' OR ' . $condition;
-
-            $this->bindings['where'][] = $condition;
 
         } else {
             throw new \Exception('Сперва должен быть выбран метод "where"');
@@ -253,7 +245,6 @@ class QueryBuilder
 
         if(!isset($this->sql['from']) && isset($this->sql['table'])) {
             $this->from($this->sql['table']);
-            $this->reset(['table']);
         }
 
         if (is_array($conditions) && count($conditions) !== 3 && count($conditions) > 0) {
@@ -291,7 +282,6 @@ class QueryBuilder
 
         if(!isset($this->sql['from']) && isset($this->sql['table'])) {
             $this->from($this->sql['table']);
-            $this->reset(['table']);
         }
 
         if (count($this->sql['where']) > 0) {
@@ -557,28 +547,21 @@ class QueryBuilder
 
     protected function escape($string)
     {
-        return  \App\Database\DB::escape($string);
+        return \App\Database\DB::escape( $string );
     }
 
     protected function has($name)
     {
-        return isset($this->sql[$name]) && (
-                                            is_string($this->sql[$name]) ?
-                                                (mb_strlen($this->sql[$name]) > 0) :
-                                                (is_array($this->sql[$name]) ?
-                                                    (count($this->sql[$name]) > 0) :
-                                                    true)
-                                            );
+        if(isset($this->sql[$name]) && is_string($this->sql[$name])) {
+            return mb_strlen($this->sql[$name]) > 0;
+        } elseif ((is_array($this->sql[$name]))) {
+            return (count($this->sql[$name]) > 0);
+        }
     }
 
     protected function getSql($name)
     {
         return isset($this->sql[$name]) ? $this->sql[$name] : null;
-    }
-
-    protected function getAllSql()
-    {
-        return $this->sql;
     }
 
     public static function __callStatic($method, $args)

@@ -157,3 +157,23 @@
 #logout-form {
     display: none;
 }
+
+.search-form {
+    margin-bottom: 20px;
+}
+
+.preview {
+    display: none;
+}
+
+#picture {
+    display: none;
+}
+
+.task-content {
+    list-style-type: none;
+}
+
+.mr20 {
+    margin-right: 20px;
+}

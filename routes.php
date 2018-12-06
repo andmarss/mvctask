@@ -18,10 +18,6 @@ $router->get('/close-task/{id}', 'TasksController@close')->name('close');
 
 $router->get('/open-task/{id}', 'TasksController@open')->name('open');
 
-$router->get('/d3', function (){
-    return view('d3/index');
-});
-
 // POST запросы
 
 $router->post('/register', 'AuthController@register')->name('register');

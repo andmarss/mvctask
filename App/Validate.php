@@ -63,7 +63,7 @@ class Validate
                         $check = DB::table($rule_value)->where([$item => $value])->first();
 
                         if ($check) {
-                            $this->addError($item,"\"{$item}\" уже существует.");
+                            $this->addError($item,"Пользователь с указанными данными: \"{$value}\", уже существует.");
                         }
                         break;
                     case 'email':
@@ -79,8 +79,6 @@ class Validate
                 }
             }
         }
-
-        die;
 
         return $this;
     }

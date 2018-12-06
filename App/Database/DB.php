@@ -7,6 +7,7 @@
 namespace App\Database;
 
 use App\App;
+use App\Database\QueryBuilder;
 
 /**
  * Класс, предоставляющий доступ к БД
@@ -50,7 +51,7 @@ class DB
 
             $this->dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-            $this->query = new \App\Database\QueryBuilder( $this->dbh );
+            $this->query = new QueryBuilder();
 
         } catch (\PDOException $e) {
             var_dump($e->getMessage()); die();
@@ -134,8 +135,6 @@ class DB
     {
         $this->query->table($name);
 
-        $this->tableName = $name;
-
         return $this;
     }
 
@@ -156,19 +155,27 @@ class DB
 
     protected function where($condition = [])
     {
-        if(!$this->query->has('select')) {
-            $this->query->select('*');
+        $table = null;
+
+        if($this->query->has('table')) {
+            $table = $this->query->getSql('table');
+            $this->tableName = $table;
         }
 
-        if(!$this->query->has('table') && !$this->query->has('from') && $this->tableName) {
-            $this->query->from($this->tableName);
+        if($this->query->has('from')) {
+            $table = $this->query->getSql('from');
+            $this->tableName = $table;
         }
 
-        if(!$this->query->has('from') && !$this->query->has('table')){
+        if(is_null($table)){
             throw new \Exception('Сперва должен быть вызван метод table, после чего один из методов: select, update, insert или delete');
-        } else {
-            $this->query->where($condition);
         }
+
+        if(!$this->query->has('select')) {
+            $this->query->select('*')->from($table);
+        }
+
+        $this->query->where($condition);
 
         return $this;
     }
@@ -272,7 +279,11 @@ class DB
 
     protected function get($class = '')
     {
-        $class = $class ? 'App\\Database\\' . ucfirst($class) : get_class($this);
+        if($this->tableName) {
+            $class = $this->getClassName( $this->tableName );
+        }
+
+        $class = $class !== '' ? 'App\\Database\\' . ucfirst($class) : null;
 
         $sql = $this->query->get();
 
@@ -336,11 +347,7 @@ class DB
 
     protected function first($class = '')
     {
-        if($this->query->has('table')) {
-            $class = $this->getClassName( $this->query->getSql('table') );
-        }
-
-        if ($this->tableName) {
+        if($this->tableName) {
             $class = $this->getClassName( $this->tableName );
         }
 
@@ -352,14 +359,14 @@ class DB
 
             $statement = $this->dbh->prepare($sql);
 
-            $statement->setFetchMode(\PDO::FETCH_CLASS, get_class((new $class)));
+            $statement->setFetchMode(\PDO::FETCH_CLASS, $class);
 
             $statement->execute();
 
             return $statement->fetch();
 
         } catch (\PDOException $e) {
-            die(var_dump($e->getMessage(), $e->getFile(), $e->getLine(), $e->getTraceAsString()));
+            die(var_dump($e->getMessage()));
         }
     }
 

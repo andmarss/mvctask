@@ -32,11 +32,11 @@
 
                                         @endforeach
 
-                                        @elseif(is_string($error))
+                                    @elseif(is_string($error))
 
-                                            <p>{{$error}}</p>
+                                        <p>{{$error}}</p>
 
-                                        @endif
+                                    @endif
 
                                 @endforeach
 
