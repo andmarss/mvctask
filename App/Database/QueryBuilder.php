@@ -8,8 +8,10 @@
 
 namespace App\Database;
 
-
 use App\App;
+
+// $arr = [[1,2,3],[4,5,6],[7,8,9]];
+// array_merge(...$arr) => [1,2,3,4,5,6,7,8,9]
 
 class QueryBuilder
 {
@@ -109,7 +111,8 @@ class QueryBuilder
             $value = func_get_arg(2);
 
             if(in_array($operator, $operators)) {
-                $this->sql['where'][] = "{$field} {$operator} {$this->escape($value)}";
+                $this->sql['where'][] = "{$field} {$operator} :{$field}";
+                $this->bindings['where'][] = [$field => $value];
             }
 
         } elseif (is_array($conditions) && count($conditions) === 3) { // where([field,operator,value])
@@ -119,15 +122,15 @@ class QueryBuilder
             $value = $conditions[2];
 
             if(in_array($operator, $operators)) {
-                $this->sql['where'][] = "{$field} {$operator} {$this->escape($value)}";
+                $this->sql['where'][] = "{$field} {$operator} :{$field}";
                 $this->bindings['where'][] = [$field => $value];
             }
 
         } elseif (is_array($conditions) && count($conditions) !== 3 && count($conditions) > 0) {
 
-            $where = implode(' AND ', array_map(function ($key, $value){
-                return "$key = {$this->escape($value)}";
-            }, array_keys($conditions), array_values($conditions)));
+            $where = implode(' AND ', array_map(function ($key){
+                return "$key = :{$key}";
+            }, array_keys($conditions)));
 
             $this->sql['where'][] = $where;
             $this->bindings['where'][] = $conditions;
@@ -179,7 +182,7 @@ class QueryBuilder
 
         } elseif (is_array($value)) {
 
-            $values = implode(', ', array_values($value));
+            $values = $this->escape( implode(', ', array_values($value)) );
             $this->sql['where'][] = "{$field} IN ({$values})";
 
         }
@@ -213,11 +216,13 @@ class QueryBuilder
 
         if (count($this->sql['where']) > 0) {
 
-            $condition = implode(' AND ', array_map(function ($key, $value){
-                return "$key = {$this->escape($value)}";
-            }, array_keys($condition), array_values($condition)));
+            $condition = implode(' AND ', array_map(function ($key){
+                return "$key = :{$key}";
+            }, array_keys($condition)));
 
             $this->sql['where'][] = ' OR ' . $condition;
+
+            $this->bindings['where'][] = $condition;
 
         } else {
             throw new \Exception('Сперва должен быть выбран метод "where"');
