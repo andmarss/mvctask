@@ -1,16 +1,12 @@
 <?php
 
 /**
- * Массив разрешенных POST-запросов
- * Если был произведен POST-запрос, а его uri не указано в текущем массиве -
- * Будет выброшено исключение
+ * Массив POST-запросов, в которых можно НЕ использовать token'ы при отправке запроса
  */
 
-return [
-    '/login',
-    '/register',
-    '/logout',
-    '/store',
-    'results',
-    'user-edit'
-];
+namespace Middleware;
+
+class VerifyCsrfToken extends CsrfMiddleware
+{
+    protected $verify = [];
+}

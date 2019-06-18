@@ -400,7 +400,8 @@ PageClass.prototype.helpers = {
         name: window.location.pathname,
 
         has: function (chunk) {
-            var r = new RegExp('^' + chunk + '$', 'ig');
+            var addSlashes = require('addSlashes');
+            var r = new RegExp('^' + addSlashes( chunk ) + '$', 'ig');
 
             return !!(this.name.match(r));
         },
@@ -425,6 +426,15 @@ PageClass.prototype.helpers = {
 
             reader.readAsDataURL(img.files[0]);
         }
+    },
+
+    addSlashes: function (str) {
+        return (str + '')
+            .replace(/[\\"']/g, '\\$&')
+            .replace(/\u0000/g, '\\0')
+            .replace(/\*/g, '\\*')
+            .replace(/\./g, '\\.')
+            .replace(/\\/g, '\\\\');
     }
 };
 
@@ -520,7 +530,7 @@ PageClass.prototype.page = function (path, callback) {
     var location = require('location'),
         isFunction = require('isFunction');
 
-    if(location.has(path) && isFunction(callback)) {
+    if((location.has(path) || path === '*') && isFunction(callback)) {
         callback.call(this);
     }
 };
@@ -530,33 +540,74 @@ PageClass.prototype.setVars = function () {
     var self = this;
 
     this.page('/', function () {
-        self.el('store-form', $('#store-form'));
+        this.el('store-form', $('#store-form'));
 
-        self.el('title', self.el('store-form').find('.title'));
+        this.el('title', self.el('store-form').find('.title'));
 
-        self.el('content', self.el('store-form').find('#content'));
+        this.el('content', self.el('store-form').find('#content'));
 
-        self.el('picture-input', self.el('store-form').find('#picture'));
+        this.el('picture-input', self.el('store-form').find('#picture'));
 
-        self.el('preview', self.el('store-form').find('#preview'));
+        this.el('preview', self.el('store-form').find('#preview'));
 
-        self.el('label', self.el('store-form').find('.file-label'));
+        this.el('label', self.el('store-form').find('.file-label'));
 
-        self.el('remove-image', self.el('store-form').find('#remove-image'));
+        this.el('remove-image', self.el('store-form').find('#remove-image'));
 
-        self.el('preview-btn', self.el('store-form').find('span.preview-btn'));
+        this.el('preview-btn', self.el('store-form').find('span.preview-btn'));
 
         // clone
 
-        self.el('clone', $('#clone'));
+        this.el('clone', $('#clone'));
 
-        self.el('clone-image', self.el('clone').find('.clone-image'));
+        this.el('clone-image', self.el('clone').find('.clone-image'));
 
-        self.el('clone-title', self.el('clone').find('.clone-title'));
+        this.el('clone-title', self.el('clone').find('.clone-title'));
 
-        self.el('clone-content', self.el('clone').find('.clone-content'));
+        this.el('clone-content', self.el('clone').find('.clone-content'));
 
-        self.el('close-clone', self.el('clone').find('.close-clone'));
+        this.el('close-clone', self.el('clone').find('.close-clone'));
+    });
+    
+    this.page('/d3', function () {
+        this.el('container', d3.select('#container'));
+
+        this.el('svg', this.el('container').select('svg'));
+
+        this.el('data', [
+            {
+                width: 200, height: 100, fill: 'purple'
+            },
+            {
+                width: 100, height: 60, fill: 'pink'
+            },
+            {
+                width: 50, height: 50, fill: 'red'
+            }
+        ]);
+
+        this.el('planets', [
+            {
+                "radius": 50,
+                "distance": 110,
+                "fill": "orange"
+            },
+            {
+                "radius": 70,
+                "distance": 260,
+                "fill": "red"
+            },
+            {
+                "radius": 35,
+                "distance": 400,
+                "fill": "brown"
+            },
+            {
+                "radius": 55,
+                "distance": 530,
+                "fill": "green"
+            }
+        ])
     });
 
     return this;
@@ -567,11 +618,11 @@ PageClass.prototype.setStates = function () {
     
     this.page('/', function () {
 
-        self.el('store-form').on('change', 'input, textarea', function () {
+        this.el('store-form').on('change', 'input, textarea', function () {
             self.el('clone').hide();
         });
 
-        self.el('picture-input').on('change', function () {
+        this.el('picture-input').on('change', function () {
             var $self = $(this),
                 value = $self.val().split('\\')[$self.val().split('\\').length-1],
                 $label = self.el('label'),
@@ -590,14 +641,14 @@ PageClass.prototype.setStates = function () {
             }
         });
 
-        self.el('remove-image').on('click', function () {
+        this.el('remove-image').on('click', function () {
             self.el('picture-input').val('');
             self.el('preview').find('img').attr('src', '');
             self.el('label').next('.file-text').remove();
             $(this).hide();
         });
 
-        self.el('preview-btn').on('click', function () {
+        this.el('preview-btn').on('click', function () {
             self.el('clone').hide();
 
             var $clone = self.el('clone'),
@@ -618,7 +669,7 @@ PageClass.prototype.setStates = function () {
             $clone.show();
         });
         
-        self.el('close-clone').on('click', function () {
+        this.el('close-clone').on('click', function () {
             self.el('clone').hide();
         });
     });

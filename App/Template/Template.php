@@ -14,6 +14,7 @@ class Template
 
     protected $compilers = [
         'layouts',
+        'comments',
         'echos',
         'forelse',
         'empty',
@@ -255,9 +256,12 @@ class Template
 
     protected static function compile_comments($value)
     {
-        $value = preg_replace('/\{\{--(.+?)(--\}\})?\n/', "<?php // $1 ?>", $value);
+/*        $value = preg_replace('/\{\{--(.+?)(--\}\})?\n/', "<?php // $1 ?>", $value);*/
 
-        return preg_replace('/\{\{--((.|\s)*?)--\}\}/', "<?php /* $1 */ ?>\n", $value);
+            $value = preg_replace('/\{\{\-\-/', "<?php /* ", $value);
+            $value = preg_replace('/\-\-\}\}/', " */ ;?>", $value);
+
+        return $value;
     }
 
     /**

@@ -31,11 +31,11 @@
 
                                         <?php endforeach; ?>
 
-                                        <?php elseif(is_string($error)): ?>
+                                    <?php elseif(is_string($error)): ?>
 
-                                            <p><?=$error;?></p>
+                                        <p><?=$error;?></p>
 
-                                        <?php endif; ?>
+                                    <?php endif; ?>
 
                                 <?php endforeach; ?>
 
@@ -75,10 +75,5 @@
             <?=paginate($per_page, $total);?>
         <?php endif; ?>
     </div>
-<?php \App\Section::stop(); ?>
-
-<?php \App\Section::start('scripts'); ?>
-    <script src="<?=asset('js/app.js');?>"></script>
-    <script src="<?=asset('js/main.js');?>"></script>
 <?php \App\Section::stop(); ?>
 <?=view('layer/main')->with(get_defined_vars())->render(); ?>

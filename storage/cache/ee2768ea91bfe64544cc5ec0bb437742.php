@@ -1,25 +1,52 @@
-<!doctype html>
-<html lang="en">
-<?=import('includes/head');?>
-<body>
-    <?=import('includes/navbar');?>
 
-    <?php if (isset($errors)) : ?>
-        <div class="container">
-            <div class="alert alert-danger" role="alert">
-                <?php if(isset($errors) && is_string($errors)) : ?>
-                    <p><?=$errors;?></p>
-                <?php endif; ?>
+<?php \App\Section::start('content'); ?>
 
-                <?php if (isset($errors) && count($errors) > 0) : ?>
-                    <?php if (!is_object($errors) && is_array($errors)) : ?>
-                        <?php foreach ($errors as $error) : ?>
-                            <p><?=$error;?></p>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                <?php endif; ?>
-            </div>
+    <?php if(\App\Session::has('success')): ?>
+        <div class="alert alert-success" role="alert">
+            <?=\App\Session::flash('success');?>
         </div>
+    <?php endif; ?>
+
+    <?php if(\App\Session::has('error')): ?>
+
+        <?php if($errors = \App\Session::flash('error')): ?>
+
+            <div class="container">
+                <div class="alert alert-danger" role="alert">
+                    <?php if(isset($errors) && is_string($errors)): ?>
+                        <p><?=$errors;?></p>
+                    <?php endif; ?>
+
+                    <?php if(isset($errors) && count($errors) > 0): ?>
+
+                        <?php if(!is_object($errors) && is_array($errors)): ?>
+
+                            <?php foreach ($errors as $error): ?>
+
+                                <?php if(is_array($error)): ?>
+
+                                    <?php foreach ($error as $err): ?>
+
+                                        <p><?=$err;?></p>
+
+                                    <?php endforeach; ?>
+
+                                <?php elseif(is_string($error)): ?>
+
+                                    <p><?=$error;?></p>
+
+                                <?php endif; ?>
+
+                            <?php endforeach; ?>
+
+                        <?php endif; ?>
+
+                    <?php endif; ?>
+                </div>
+            </div>
+
+        <?php endif; ?>
+
     <?php endif; ?>
 
     <div class="container">
@@ -27,16 +54,16 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Регистрация</div>
                 <div class="panel-body">
-                    <form role="form" method="POST" enctype="multipart/form-data" action="<?=route('register')?>" class="form-horizontal">
+                    <form role="form" method="POST" enctype="multipart/form-data" action="<?=route('register');?>" class="form-horizontal">
                         <input type="hidden" name="token" value="<?=csrf_token();?>">
 
                         <div class="form-group">
                             <label for="email" class="col-md-4 control-label">Логин</label>
                             <div class="col-md-6">
-                                <input id="login" name="name" value="<?=old('name')?>" required="required" autofocus="autofocus" class="form-control">
-                                <?php if (isset($errors) && count($errors) > 0 && isset($errors->name)) : ?>
-                                    <?php foreach ($errors->name as $error) : ?>
-                                        <p class="text-danger"><?=$error;?></p>
+                                <input id="login" name="name" value="<?=old('name');?>" required="required" autofocus="autofocus" class="form-control">
+                                <?php if(isset($errors) && count($errors) > 0 && isset($errors->name)): ?>
+                                    <?php foreach ($errors->name as $error): ?>
+                                        <p class="text-danger"></p>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </div>
@@ -45,8 +72,8 @@
                             <label for="email" class="col-md-4 control-label">Email адрес</label>
                             <div class="col-md-6">
                                 <input id="email" type="email" name="email" value="<?=old('email')?>" required="required" autofocus="autofocus" class="form-control">
-                                <?php if (isset($errors) && count($errors) > 0 && isset($errors->email)) : ?>
-                                    <?php foreach ($errors->email as $error) : ?>
+                                <?php if(isset($errors) && count($errors) > 0 && isset($errors->email)): ?> : ?>
+                                    <?php foreach ($errors->email as $error): ?>
                                         <p class="text-danger"><?=$error;?></p>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -56,8 +83,8 @@
                             <label for="password" class="col-md-4 control-label">Пароль</label>
                             <div class="col-md-6">
                                 <input id="password" type="password" name="password" required="required" class="form-control" value="<?=old('password')?>">
-                                <?php if (isset($errors) && count($errors) > 0 && isset($errors->password)) : ?>
-                                    <?php foreach ($errors->password as $error) : ?>
+                                <?php if (isset($errors) && count($errors) > 0 && isset($errors->password)): ?>
+                                    <?php foreach ($errors->password as $error): ?>
                                         <p class="text-danger"><?=$error;?></p>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -75,6 +102,6 @@
             </div>
         </div>
     </div>
-    <script src="<?=asset('js/app.js')?>"></script>
-</body>
-</html>
+
+<?php \App\Section::stop(); ?>
+<?=view('layer/main')->with(get_defined_vars())->render(); ?>

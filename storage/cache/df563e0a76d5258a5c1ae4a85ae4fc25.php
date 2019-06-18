@@ -1,5 +1,5 @@
 <?php if (isset($task)): ?>
-    <li style="list-style-type: none;">
+    <li class="task-content">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <span><?=!is_null($task->user()) && $task->user()->name ? $task->user()->name : 'Пользователь';?>, <b><?=(new DateTime($task->created_at))->format('d-m-Y');?></b></span>
@@ -10,9 +10,9 @@
                     <?php if ((\App\Auth::id() === $task->user()->id) || \App\Auth::user()->admin): ?>
 
                         <?php if(!$task->completed): ?>
-                            <a href="<?=route('close', ['id' => $task->id]);?>" class="btn btn-primary btn-xs pull-right" style="margin-right: 20px;">Закрыть</a>
+                            <a href="<?=route('close', ['id' => $task->id]);?>" class="btn btn-primary btn-xs pull-right mr20">Закрыть</a>
                         <?php else: ?>
-                            <a href="<?=route('open', ['id' => $task->id]);?>" class="btn btn-primary btn-xs pull-right" style="margin-right: 20px;">Открыть</a>
+                            <a href="<?=route('open', ['id' => $task->id]);?>" class="btn btn-primary btn-xs pull-right mr20">Открыть</a>
                         <?php endif; ?>
 
                     <?php endif; ?>
@@ -21,7 +21,7 @@
 
                 <?php if(\App\Auth::check()): ?>
                     <?php if ((\App\Auth::id() === $task->user()->id) || \App\Auth::user()->admin): ?>
-                        <a href="<?=route('task.remove', ['id' => $task->id]);?>" class="btn btn-default btn-xs pull-right" style="margin-right: 20px;">Удалить</a>
+                        <a href="<?=route('task.remove', ['id' => $task->id]);?>" class="btn btn-default btn-xs pull-right mr20">Удалить</a>
                     <?php endif; ?>
                 <?php endif; ?>
 

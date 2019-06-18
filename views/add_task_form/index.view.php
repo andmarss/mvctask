@@ -13,7 +13,7 @@
             <div class="form-group">
                 <label for="picture" class="file-label personalArea__file-label--required"><i class="fas fa-download"></i>Выберите файл</label>
                 <span id="remove-image" class="remove-image"><i class="fas fa-times"></i></span>
-                <input type="file" name="picture" id="picture" class="form-control" required>
+                <input type="file" name="picture" id="picture" class="hidden" required>
                 <div id="preview" class="preview">
                     <img src="" alt="">
                 </div>
@@ -34,7 +34,7 @@
     <div class="panel-body" id="clone">
         <span class="close-clone"><i class="fas fa-times"></i></span>
         <div class="panel-heading">
-            <span>{{isset(\App\Auth::user()->name) ? \App\Auth::user()->name : 'Пользователь'}}, <b><{{(new DateTime())->format('d-m-Y')}}</b></span>
+            <span>{{isset(\App\Auth::user()->name) ? \App\Auth::user()->name : 'Пользователь'}}, <b>{{(new DateTime())->format('d-m-Y')}}</b></span>
             <span class="btn pull-right btn-danger btn-xs">Открыта</span>
         </div>
         <div class="panel-body">

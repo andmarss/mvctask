@@ -15,7 +15,9 @@
                     @if($errors = \App\Session::flash('error'))
 
                         <div class="container">
+
                             <div class="alert alert-danger" role="alert">
+
                                 @if(isset($errors) && is_string($errors))
                                     <p>{{$errors}}</p>
                                 @endif
@@ -45,7 +47,9 @@
                                     @endif
 
                                 @endif
+
                             </div>
+
                         </div>
 
                     @endif
@@ -59,6 +63,12 @@
             @endif
 
             @import('personal_area/edit', ['user' => $user])
+
+            @if(count($tasks) > 0)
+                <h3>Список ваших задач</h3>
+
+                @import('personal_area/table', ['tasks' => $tasks])
+            @endif
 
         @else
             <h3>У вас нет прав для просмотра данной страницы.</h3>

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{asset('css/app.css')}}">
     <link rel="stylesheet" href="{{asset('css/main.css')}}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-    <title>{{isset($document) ? $document : 'Document'}}</title>
+    <title>{{isset($document) ? $document : 'Задачник'}}</title>
 </head>
 <body>
     @import('includes/navbar')
@@ -17,5 +17,7 @@
 
     <script src="{{asset('js/app.js')}}"></script>
     <script src="{{asset('js/main.js')}}"></script>
+
+    @yield('scripts')
 </body>
 </html>

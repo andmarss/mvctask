@@ -48,7 +48,7 @@ class Validate
                             $this->addError($item,"\"{$item}\" должно быть меньше {$rule_value} знаков.");
                         }
                         break;
-                    case 'matches':
+                    case 'match':
                         if (trim($value) !== $request->{$rule_value}) {
                             $this->addError($item,"\"{$item}\" должно быть совпадать с {$rule_value}.");
                         }

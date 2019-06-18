@@ -35,7 +35,7 @@ class AuthController extends Controller
             $user = Auth::register($request);
 
             if($user) {
-                return redirect('/personal-area/' . $user->id);
+                return redirect()->route('personal-area', ['id' => $user->id]);
             }
         }
     }
@@ -45,6 +45,10 @@ class AuthController extends Controller
         return view('login/index');
     }
 
+    /**
+     * @param $request
+     * @throws \Exception
+     */
     public function login($request)
     {
         $this->validate($request, [
@@ -63,7 +67,7 @@ class AuthController extends Controller
         }
 
         if($user = Auth::login($request, $remember)) {
-            return redirect('/personal-area/' . $user->id);
+            return redirect()->route('personal-area', ['id' => $user->id]);
         } else {
             return redirect()->back(['errors' => 'Введены некорректные данные']);
         }

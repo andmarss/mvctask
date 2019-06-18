@@ -161,6 +161,8 @@ class QueryBuilder
             $this->from($this->sql['table']);
         }
 
+        $this->reset(['table']);
+
         if(is_callable($value)) {
 
             $this->sql['where'][] = "{$field} IN ({$value((new self()))})";
@@ -173,6 +175,40 @@ class QueryBuilder
 
             $values = implode(', ', array_values($value));
             $this->sql['where'][] = "{$field} IN ({$values})";
+
+        }
+
+        return $this;
+    }
+
+    protected function whereNotIn($field, $value, $selectedField = null)
+    {
+        if(!isset($this->sql['select']) && !isset($this->sql['delete']) && !isset($this->sql['update'])) {
+            $this->select();
+        }
+
+        if(!isset($this->sql['from']) && !isset($this->sql['table']) && !isset($this->sql['update']) && !isset($this->sql['delete'])) {
+            throw new \Exception('Необходимо указать имя таблицы, откуда будет происходить выборка данных');
+        }
+
+        if(!isset($this->sql['from']) && isset($this->sql['table'])) {
+            $this->from($this->sql['table']);
+        }
+
+        $this->reset(['table']);
+
+        if(is_callable($value)) {
+
+            $this->sql['where'][] = "{$field} NOT IN ({$value((new self()))})";
+
+        } elseif (is_string($value) && is_string($selectedField)) {
+
+            $this->sql['where'][] = "{$field} NOT IN (SELECT {$selectedField} FROM {$value})";
+
+        } elseif (is_array($value)) {
+
+            $values = implode(', ', array_values($value));
+            $this->sql['where'][] = "{$field} NOT IN ({$values})";
 
         }
 
@@ -201,6 +237,8 @@ class QueryBuilder
         if(!isset($this->sql['from']) && isset($this->sql['table'])) {
             $this->from($this->sql['table']);
         }
+
+        $this->reset(['table']);
 
         if (count($this->sql['where']) > 0) {
 
@@ -241,6 +279,8 @@ class QueryBuilder
             $this->from($this->sql['table']);
         }
 
+        $this->reset(['table']);
+
         if (is_array($conditions) && count($conditions) !== 3 && count($conditions) > 0) {
 
             $where = implode(' AND ', array_map(function ($key, $value){
@@ -277,6 +317,8 @@ class QueryBuilder
         if(!isset($this->sql['from']) && isset($this->sql['table'])) {
             $this->from($this->sql['table']);
         }
+
+        $this->reset(['table']);
 
         if (count($this->sql['where']) > 0) {
 

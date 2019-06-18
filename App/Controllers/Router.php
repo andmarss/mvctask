@@ -28,6 +28,18 @@ class Router
 
     protected static $instance;
 
+    protected $verifyCsrfMiddleware;
+
+    protected $authMiddleware;
+
+    protected $middlewares = [];
+
+    public function __construct()
+    {
+        $this->verifyCsrfMiddleware = new \Middleware\VerifyCsrfToken();
+        $this->authMiddleware = new \Middleware\AuthMiddleware();
+    }
+
     /**
      * @param $file
      * @return static
@@ -108,6 +120,30 @@ class Router
     }
 
     /**
+     * @param $name
+     * @return $this
+     *
+     * Привязывает uri к соответствующему middleware
+     */
+
+    protected function middleware($name)
+    {
+        switch ($name) {
+            case 'auth':
+                if(!is_array($this->middlewares[$this->uri])) {
+                    $this->middlewares[$this->uri] = [];
+                }
+
+                $this->middlewares[$this->uri][] = function (){
+                    $this->authMiddleware->handle();
+                };
+                break;
+        }
+
+        return $this;
+    }
+
+    /**
      * @param $uri
      * @return mixed
      * @throws \Exception
@@ -121,9 +157,27 @@ class Router
 
         [$parameters, $pattern] = $this->inPatternsRoutesExists($uri, $method);
 
+        // Проверяем, подписан ли маршрут к middleware
+        // Если да - вызываем его
+        if(array_key_exists($uri, $this->middlewares)) {
+            foreach($this->middlewares[$uri] as $middleware) {
+                $middleware();
+            }
+        } elseif ($parameters && array_key_exists($pattern, $this->middlewares)) {
+            foreach($this->middlewares[$pattern] as $middleware) {
+                $middleware();
+            }
+        }
+
         if(is_callable($this->routes[$method][$uri])) {
 
             $method = $this->routes[$method][$uri];
+
+            return $this->call(function ($request, ...$params) use ($method) { return $method($request, ...$params); });
+
+        }  elseif($parameters && is_callable ($this->routes[$method][$pattern])) {
+
+            $method = $this->routes[$method][$pattern];
 
             if($parameters) {
                 return $this->call(function ($request, ...$params) use ($method) { return $method($request, ...$params); }, ...$parameters);
@@ -174,6 +228,14 @@ class Router
         return $this->call(function ($request, ...$params) use ($controller, $action) { return $controller->{$action}($request, ...$params); }, ...$params);
     }
 
+    /**
+     * @param $function
+     * @param array ...$params
+     * @return $this
+     *
+     * Вызывает переданную функцию
+     */
+
     private function call($function, ...$params)
     {
         if(Request::method() === 'GET'){
@@ -183,29 +245,7 @@ class Router
 
             $request = Request::post();
 
-            if(!$this->containsInTokens(Request::uri())) {
-                if(App::get('DEV')) {
-                    throw new \Exception('Необходимо объявить маршрут "' . Request::uri() . '" в файле "Middleware/VerifyCsrfToken.php".');
-                } else {
-                    throw new \Exception('Упс... Что-то пошло не так... Сообщите о проблеме администратору. Код: 1000');
-                }
-            }
-
-            if(!$request->token) {
-                if(App::get('DEV')) {
-                    throw new \Exception('Необходимо добавить скрытое поле с именем "token" на форме текущего запроса.');
-                } else {
-                    throw new \Exception('Упс... Что-то пошло не так... Сообщите о проблеме администратору. Код: 1100');
-                }
-            }
-
-            if($request->token && !Token::check($request->token)) {
-                if(App::get('DEV')) {
-                    throw new \Exception('Неверный токен.');
-                } else {
-                    throw new \Exception('Упс... Что-то пошло не так... Сообщите о проблеме администратору. Код: 1200');
-                }
-            }
+            $this->verifyCsrfMiddleware->handle($request);
 
             echo $function($request, ...$params);
 
@@ -213,38 +253,6 @@ class Router
         }
 
         return $this;
-    }
-
-    /**
-     * @param string $uri
-     * @return bool
-     *
-     * Проверяет, содержиться ли указанный uri в массиве разрешенных маршрутов (для метода POST)
-     */
-
-    protected function containsInTokens($uri = '')
-    {
-        $tokensRouts = collect(App::get('tokens'))->map(function ($route){
-
-            return trim( parse_url( $route, PHP_URL_PATH), '/' );
-
-        })->get(); // загружаем из файла VerifyCsrfToken.php все разрешенные post маршруты
-
-        if(!in_array(Request::uri(), $tokensRouts)) {
-            foreach ($tokensRouts as $token) {
-                $token = preg_replace('/\//', '\/', trim($token));
-
-                if(preg_match("/{$token}/", $uri)) {
-                    return true;
-                } else {
-                    continue;
-                }
-            }
-
-            return false;
-        } else {
-            return true;
-        }
     }
 
     /**

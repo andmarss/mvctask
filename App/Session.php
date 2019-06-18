@@ -104,6 +104,11 @@ class Session
         return true;
     }
 
+    protected function token()
+    {
+        return (new Token());
+    }
+
     public static function __callStatic($method, $args)
     {
         if(!is_object(static::$instance)) {

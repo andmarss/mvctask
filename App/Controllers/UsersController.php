@@ -35,7 +35,8 @@ class UsersController extends Controller
 
         if($user) {
             return view('personal_area/index', [
-                'user' => $user
+                'user' => $user,
+                'tasks' => $user->tasks()
             ]);
         } else {
             Session::flash('error', 'Пользователь не найден, или произошла ошибка при выполнении запроса');
@@ -50,7 +51,7 @@ class UsersController extends Controller
             Auth::logout();
         }
 
-        return redirect('/');
+        return redirect('/login');
     }
 
     public function edit($request, $id)
@@ -73,19 +74,19 @@ class UsersController extends Controller
                 ]
             ]);
 
-            if(isset($request->name)) {
+            if($request->name) {
                 $user->name = $request->name;
             }
 
-            if(isset($request->password)) {
+            if($request->password) {
                 $user->password = password_hash($request->password, PASSWORD_BCRYPT);
             }
 
-            if (isset($request->email)) {
+            if ($request->email) {
                 $user->email = $request->email;
             }
 
-            if(isset($request->phone)) {
+            if($request->phone) {
                 $user->phone = $request->phone;
             }
 

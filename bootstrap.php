@@ -12,8 +12,6 @@ use App\Controllers\{Request, Router};
 
 App::bind('config', require 'config.php');
 
-App::bind('tokens', require 'App/Middleware/VerifyCsrfToken.php');
-
 App::bind('database', ( new DB( App::get('config/database') ) ) );
 
 App::bind('DEV', true);

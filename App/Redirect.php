@@ -84,6 +84,7 @@ class Redirect
     /**
      * @param $name
      * @param array $data
+     * @throws \Exception
      *
      * Перенаправлят пользователя по имени маршрута
      */

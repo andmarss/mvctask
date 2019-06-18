@@ -62,6 +62,7 @@
                             <label for="email" class="col-md-4 control-label">Email адрес</label>
                             <div class="col-md-6">
                                 <input id="email" type="email" name="email" value="{{old('email')}}" required="required" autofocus="autofocus" class="form-control">
+                                <p>{{$errors}}</p>
                                 @if (isset($errors) && count($errors) > 0 && isset($errors->email))
                                     @foreach ($errors->email as $error)
                                         <p class="text-danger">{{$error}}</p>

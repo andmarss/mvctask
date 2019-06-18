@@ -19,6 +19,9 @@
                     <li>
                         <a href="<?=route('register-index');?>">Зарегестрироваться</a>
                     </li>
+                    <li>
+                        <a href="<?=route('reset-index');?>">Восстановить пароль</a>
+                    </li>
                 <?php else: ?>
                     <li class="dropdown">
                         <a href="#" data-toggle="dropdown" role="button" aria-expanded="false" class="dropdown-toggle">

@@ -8,6 +8,7 @@
 namespace App\Controllers;
 
 use App\File;
+use App\Session;
 
 /**
  * Class Request
@@ -23,13 +24,20 @@ class Request
 
     protected static $instance;
 
+    protected $session;
+
+    public function __construct()
+    {
+        $this->session = new Session();
+    }
+
     /**
      * @return string
      *
      * Возвращает чистый uri (убирает боковые слеши)
      */
 
-    public static function uri()
+    protected function uri()
     {
         return trim(
             parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'
@@ -147,6 +155,11 @@ class Request
     public function file($name)
     {
         return (new \App\UploadFile($_FILES[$name]));
+    }
+
+    public function session()
+    {
+        return $this->session;
     }
 
     public static function __callStatic($method, $args)
